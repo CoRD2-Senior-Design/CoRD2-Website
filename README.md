@@ -9,4 +9,4 @@ Also when making a pull request use the issue in the title "KAN-1 Example".
 ## Running the Application
 To run the app use a terminal and navigate to the apps directory.  Then run `flutter run -d chrome`.  
 This will compile the web app and run it in a chrome browser.  
-Flutter doesn't support hot reload for web browsers so everytime you make a change you'll have to re-run the command.
+Flutter doesn't support hot reload for web browsers so everytime you make a change you'll have to press `r` in the terminal.
