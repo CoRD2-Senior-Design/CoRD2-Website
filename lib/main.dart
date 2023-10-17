@@ -49,7 +49,7 @@ class _NavBarState extends State<NavBar>
               child: Text("SCC RiskComm", style: TextStyle(color: Colors.white)),
             ),
             Flexible(
-              flex: 3,
+              flex: 2,
               fit: FlexFit.loose,
               child: TabBar(
                 indicator: const ShapeDecoration(
