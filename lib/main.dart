@@ -1,3 +1,4 @@
+import 'package:cord2_website/pages/cord2.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const CordWebsite());
@@ -92,7 +93,7 @@ class _NavBarState extends State<NavBar>
             child: Text("People Page Goes Here"),
           ),
           Center(
-            child: Text("CORD2 Page Goes Here"),
+            child: Cord2(),
           ),
           Center(
             child: Text("Publications Page Goes Here"),
