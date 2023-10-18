@@ -13,6 +13,8 @@ class Cord2 extends StatelessWidget{
     double width = MediaQuery.of(context).size.width;
     double lrPadding = width > 750 ? 150.0 : 50;
     double tbPadding = width > 750 ? 50.0 : 15;
+    const double defaultFont = 16.0;
+    double fontScaling = width > 750 ? 1.0 : 0.8;
     return Scaffold (
         body: Center(
           child: Padding(
@@ -22,13 +24,13 @@ class Cord2 extends StatelessWidget{
                 right: lrPadding,
                 bottom: tbPadding,
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Center(
                   child: SelectableText(
                     "CoRD\u00B2",
-                    style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 35.0 * fontScaling, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Flexible(
@@ -37,7 +39,7 @@ class Cord2 extends StatelessWidget{
                     " important concerns relating to resilient and AI-driven "
                     "data services through networked communities and "
                     "cross-sector partnerships.",
-                    style: TextStyle(fontSize: 18.0),
+                    style: TextStyle(fontSize: defaultFont * fontScaling),
                   ),
                 ),
                 Padding(
@@ -45,7 +47,7 @@ class Cord2 extends StatelessWidget{
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text("\u2022  "),
+                      const Text("\u2022  "),
                       Flexible(
                         child: SelectableText(
                           "Data of interest for this project are from "
@@ -56,7 +58,7 @@ class Cord2 extends StatelessWidget{
                           "distributed data storage and retrieval system to "
                           "coordinate and accommodate all desires is needed.",
                           style: TextStyle(
-                            fontSize: 18.0,
+                            fontSize: defaultFont * fontScaling,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -69,7 +71,7 @@ class Cord2 extends StatelessWidget{
                     child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Text("\u2022  "),
+                          const Text("\u2022  "),
                           Flexible(
                               child: SelectableText(
                                 "As natural disasters may cause "
@@ -80,7 +82,7 @@ class Cord2 extends StatelessWidget{
                                 "improve the reliability of data and "
                                 "computer systems.",
                                 style: TextStyle(
-                                  fontSize: 18.0,
+                                  fontSize: defaultFont * fontScaling,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -93,7 +95,7 @@ class Cord2 extends StatelessWidget{
                     child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Text("\u2022  "),
+                          const Text("\u2022  "),
                           Flexible(
                               child: SelectableText(
                                 "State-of-the-art machine learning "
@@ -101,7 +103,7 @@ class Cord2 extends StatelessWidget{
                                 "multi-modal data sources (e.g., texts "
                                 "and images).",
                                 style: TextStyle(
-                                  fontSize: 18.0,
+                                  fontSize: defaultFont * fontScaling,
                                   fontWeight: FontWeight.w400
                                 ),
                               ),
@@ -109,7 +111,7 @@ class Cord2 extends StatelessWidget{
                         ],
                     ),
                 ),
-                Flexible(
+                const Flexible(
                   child: GoogleMap(initialCameraPosition: _ucf,),
                 ),
               ],
