@@ -50,7 +50,7 @@ class _NavBarState extends State<NavBar>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             const Flexible(
-              child: Text("SCC RiskComm", style: TextStyle(color: Colors.white)),
+              child: SelectableText("SCC RiskComm", style: TextStyle(color: Colors.white)),
             ),
             Flexible(
               flex: 2,

@@ -10,30 +10,35 @@ class Cord2 extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return  const Scaffold (
+    double width = MediaQuery.of(context).size.width;
+    double lrPadding = width > 750 ? 150.0 : 50;
+    double tbPadding = width > 750 ? 50.0 : 15;
+    return Scaffold (
         body: Center(
           child: Padding(
             padding: EdgeInsets.only(
-                top: 50.0,
-                left: 150.0,
-                right: 150.0,
-                bottom: 50.0
+                top: tbPadding,
+                left: lrPadding,
+                right: lrPadding,
+                bottom: tbPadding,
             ),
-            child: Column(
+            child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Center(
-                  child: Text(
+                  child: SelectableText(
                     "CoRD\u00B2",
                     style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold),
                   ),
                 ),
-                Text(
-                  "Community Resilience Data Depot system (CoRD2) will target"
-                  " important concerns relating to resilient and AI-driven "
-                  "data services through networked communities and "
-                  "cross-sector partnerships.",
-                  style: TextStyle(fontSize: 18.0),
+                Flexible(
+                  child:  SelectableText(
+                    "Community Resilience Data Depot system (CoRD2) will target"
+                    " important concerns relating to resilient and AI-driven "
+                    "data services through networked communities and "
+                    "cross-sector partnerships.",
+                    style: TextStyle(fontSize: 18.0),
+                  ),
                 ),
                 Padding(
                   padding: EdgeInsets.only(left: 20.0),
@@ -42,7 +47,7 @@ class Cord2 extends StatelessWidget{
                     children: <Widget>[
                       Text("\u2022  "),
                       Flexible(
-                        child: Text(
+                        child: SelectableText(
                           "Data of interest for this project are from "
                           "different origins and have different analytical "
                           "desires. Such origin diversity arises due to the "
@@ -66,7 +71,7 @@ class Cord2 extends StatelessWidget{
                         children: <Widget>[
                           Text("\u2022  "),
                           Flexible(
-                              child: Text(
+                              child: SelectableText(
                                 "As natural disasters may cause "
                                 "failures in computer systems (e.g., "
                                 "data loss, equipment failure, and power "
@@ -90,7 +95,7 @@ class Cord2 extends StatelessWidget{
                         children: <Widget>[
                           Text("\u2022  "),
                           Flexible(
-                              child: Text(
+                              child: SelectableText(
                                 "State-of-the-art machine learning "
                                 "techniques will be designed to analyze "
                                 "multi-modal data sources (e.g., texts "
