@@ -1,11 +1,11 @@
 {
-    "name": "learn_flutter",
-    "short_name": "learn_flutter",
+    "name": "cord2_website",
+    "short_name": "cord2_website",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "The CoRD2 Website.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
