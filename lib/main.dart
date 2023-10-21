@@ -132,6 +132,7 @@ class HomePage extends StatelessWidget {
     return ListView(
       children: [
         Container(
+          height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
           color: Colors.white,
           alignment: Alignment.topCenter,
