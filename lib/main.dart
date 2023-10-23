@@ -204,22 +204,26 @@ class HomePage extends StatelessWidget {
   }
 
   // Returns the article title as an AutoSizeText widget
-  AutoSizeText _displayArticleTitle(TextStyle linkStyle) {
-    return AutoSizeText.rich(
-      TextSpan(
-        text: 'Leveraging Smart Technologies and ' +
-            'Managing Community Resilience through ' +
-            'Networked Communities and Cross-Sector Partnerships',
-        recognizer: TapGestureRecognizer()
-          ..onTap = () => launchUrl(Uri.parse(
-              'https://www.nsf.gov/awardsearch/showAward?AWD_ID=1952792&HistoricalAwards=false')),
+  Tooltip _displayArticleTitle(TextStyle linkStyle) {
+    String titleLink =
+        'https://www.nsf.gov/awardsearch/showAward?AWD_ID=1952792&HistoricalAwards=false';
+    return Tooltip(
+      message: titleLink,
+      verticalOffset: 50,
+      child: AutoSizeText.rich(
+        TextSpan(
+          text:
+              'Leveraging Smart Technologies and Managing Community Resilience through Networked Communities and Cross-Sector Partnerships',
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => launchUrl(Uri.parse(titleLink)),
+        ),
+        style: linkStyle.copyWith(
+          fontSize: 20,
+          letterSpacing: 1,
+        ),
+        maxLines: 6,
+        maxFontSize: 23,
       ),
-      style: linkStyle.copyWith(
-        fontSize: 20,
-        letterSpacing: 1,
-      ),
-      maxLines: 6,
-      maxFontSize: 23,
     );
   }
 
