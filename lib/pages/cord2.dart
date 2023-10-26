@@ -34,17 +34,7 @@ class Cord2 extends StatelessWidget{
         const Text("\u2022  "),
         Flexible(
           fit: FlexFit.loose,
-          child: _createText(
-            "As natural disasters may cause "
-            "failures in computer systems (e.g., "
-            "data loss, equipment failure, and power "
-            "disruption), cutting-edge resilience "
-            "techniques will be designed and deployed to "
-            "improve the reliability of data and "
-            "computer systems.",
-            style,
-            fontSize
-            )
+          child: _createText(text, style, fontSize)
         )
       ])
     );
@@ -66,13 +56,13 @@ class Cord2 extends StatelessWidget{
           child:  _createSummary(headerStyle, defaultFont * fontScaling)
         ),
         _createBullet(
-          "As natural disasters may cause "
-              "failures in computer systems (e.g., "
-              "data loss, equipment failure, and power "
-              "disruption), cutting-edge resilience "
-              "techniques will be designed and deployed to "
-              "improve the reliability of data and "
-              "computer systems.",
+          "Data of interest for this project are from different "
+              "origins and have different analytical desires. "
+              "Such origin diversity arises due to the different "
+              "partners involved in this project as well as different "
+              "data generation sources. An integrated distributed data "
+              "storage and retrieval system to coordinate and accommodate "
+              "all desires is needed.",
           headerStyle,
           defaultFont * fontScaling,
           const EdgeInsets.only(left: 20.0)
