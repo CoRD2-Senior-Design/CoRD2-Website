@@ -32,8 +32,7 @@ class Cord2 extends StatelessWidget{
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
         const Text("\u2022  "),
-        Flexible(
-          fit: FlexFit.loose,
+        Expanded(
           child: _createText(text, style, fontSize)
         )
       ])
@@ -51,10 +50,7 @@ class Cord2 extends StatelessWidget{
         Center(
           child: _createText("CoRD\u00B2", boldStyle, 35.0 * fontScaling)
         ),
-        Flexible(
-          fit: FlexFit.loose,
-          child:  _createSummary(headerStyle, defaultFont * fontScaling)
-        ),
+        _createSummary(headerStyle, defaultFont * fontScaling),
         _createBullet(
           "Data of interest for this project are from different "
               "origins and have different analytical desires. "
@@ -88,8 +84,7 @@ class Cord2 extends StatelessWidget{
           defaultFont * fontScaling,
           const EdgeInsets.only(left: 20.0, bottom: 20.0)
         ),
-        const Flexible(
-          fit: FlexFit.loose,
+        const Expanded(
           child: GoogleMap(initialCameraPosition: _ucf,),
         ),
       ],
