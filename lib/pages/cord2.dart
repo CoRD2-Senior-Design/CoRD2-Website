@@ -39,13 +39,23 @@ class Cord2 extends StatelessWidget{
     );
   }
 
-  Column _createPageContent(double screenWidth) {
+  ListView _createPageContent(double screenWidth) {
     const double defaultFont = 16.0;
     double fontScaling = screenWidth > 750 ? 1.0 : 0.8;
+
     TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
     TextStyle headerStyle = const TextStyle(fontWeight: FontWeight.w400);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+
+    double lrPadding = screenWidth > 750 ? 150.0 : 50;
+    double tbPadding = screenWidth > 750 ? 50.0 : 15;
+
+    return ListView(
+      padding: EdgeInsets.only(
+        top: tbPadding,
+        left: lrPadding,
+        right: lrPadding,
+        bottom: tbPadding,
+      ),
       children: <Widget>[
         Center(
           child: _createText("CoRD\u00B2", boldStyle, 35.0 * fontScaling)
@@ -84,9 +94,7 @@ class Cord2 extends StatelessWidget{
           defaultFont * fontScaling,
           const EdgeInsets.only(left: 20.0, bottom: 20.0)
         ),
-        const Expanded(
-          child: GoogleMap(initialCameraPosition: _ucf,),
-        ),
+        _createText("ArcGIS Map will go here", boldStyle, defaultFont * fontScaling)
       ],
     );
   }
@@ -95,20 +103,10 @@ class Cord2 extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    double lrPadding = width > 750 ? 150.0 : 50;
-    double tbPadding = width > 750 ? 50.0 : 15;
 
     return Scaffold (
         body: Center(
-          child: Padding(
-            padding: EdgeInsets.only(
-                top: tbPadding,
-                left: lrPadding,
-                right: lrPadding,
-                bottom: tbPadding,
-            ),
             child: _createPageContent(width)
-          )
         ),
     );
   }
