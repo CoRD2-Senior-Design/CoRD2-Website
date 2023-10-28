@@ -241,6 +241,14 @@ class HomePage extends StatelessWidget {
   // Returns the article abstract as a widget
   Column _displayArticleAbstract(
       TextStyle linkStyle, TextStyle bodyStyle, BuildContext context) {
+    // Sends user to abstract page
+    void goToAbstractRoute() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FullAbstractRoute()),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,13 +259,7 @@ class HomePage extends StatelessWidget {
               text: 'Abstract',
               style: linkStyle,
               recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const FullAbstractRoute()),
-                  );
-                },
+                ..onTap = () => goToAbstractRoute(),
             ),
           ),
         ),
@@ -281,13 +283,7 @@ class HomePage extends StatelessWidget {
                   text: 'Read more',
                   style: linkStyle,
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const FullAbstractRoute()),
-                      );
-                    },
+                    ..onTap = () => goToAbstractRoute(),
                 ),
               ],
             ),
@@ -372,7 +368,7 @@ class FullAbstractRoute extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                           foregroundColor: Colors.white),
-                      child: const Text('Return to home page.'),
+                      child: const Text('Return to home page'),
                     ),
                   ),
                 ],
