@@ -1,3 +1,5 @@
+import 'package:cord2_website/pages/people.dart';
+import 'package:cord2_website/pages/projects.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const CordWebsite());
@@ -84,21 +86,21 @@ class _NavBarState extends State<NavBar>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const <Widget>[
-          Center(
+        children: <Widget>[
+          const Center(
             child: Text("Home Page Goes Here"),
           ),
           Center(
-            child: Text("People Page Goes Here"),
+            child: PeoplePage(),
           ),
-          Center(
+          const Center(
             child: Text("CORD2 Page Goes Here"),
           ),
-          Center(
+          const Center(
             child: Text("Publications Page Goes Here"),
           ),
-          Center(
-            child: Text("Projects Page Goes Here"),
+          const Center(
+            child: ProjectsPage(),
           ),
         ],
       ),
