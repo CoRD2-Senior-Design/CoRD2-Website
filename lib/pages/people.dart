@@ -97,6 +97,30 @@ class PeoplePage extends StatelessWidget {
     // Add former members here
   ];
 
+  final List<Person> seniorDesign = [
+    Person(
+        name: 'Colby Wang',
+        image: 'colby.jpg',
+        school: 'Undergrad Student, University of Central Florida'),
+    Person(
+        name: 'Leonardo Marquez',
+        image: 'leo.jpg',
+        school: 'Undergrad Student, University of Central Florida'),
+    Person(
+        name: 'Dick Dela Cruz',
+        image: 'dc.jpg',
+        school: 'Undergrad Student, University of Central Florida'),
+    Person(
+        name: 'Tarina Sadek',
+        image: 'tarina.jpg',
+        school: 'Under Grad Student, University of Central Florida'),
+    Person(
+        name: 'Menachem Jaimovich',
+        image: 'mendy.jpg',
+        school: 'Undergrad Student, University of Central Florida'),
+    // Add former members here
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,9 +132,10 @@ class PeoplePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildPeopleGrid("Project Investigators", projectInvestigators),
-                _buildPeopleGrid("Research Assistants", researchAssistants),
-                _buildPeopleGrid("Former Members", formerMembers),
+                _buildPeopleGrid(context, "Project Investigators", projectInvestigators),
+                _buildPeopleGrid(context, "Research Assistants", researchAssistants),
+                _buildPeopleGrid(context, "Former Members", formerMembers),
+                _buildPeopleGrid(context, "Senior Design", seniorDesign)
               ],
             ),
           ),
@@ -119,14 +144,25 @@ class PeoplePage extends StatelessWidget {
     );
   }
 
-  Widget _buildPeopleGrid(String title, List<Person> people) {
+  Widget _buildPeopleGrid(
+      BuildContext context, String title, List<Person> people) {
+    int crossAxisCount = 3; // Default number of columns
+    double width = MediaQuery.of(context).size.width;
+
+    if (width < 450) {
+      crossAxisCount = 1;
+    } else if (width < 700) {
+      crossAxisCount = 2;
+    } // Add more breakpoints as needed
+
+    double maxGridBlockSize = 200.0; // Maximum size for each grid block
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Center(
-            // Wrap the title Text with Center widget
             child: Text(
               title,
               style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
@@ -135,40 +171,52 @@ class PeoplePage extends StatelessWidget {
         ),
         GridView.builder(
           shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, // Number of columns in the grid
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
           ),
           itemCount: people.length,
           itemBuilder: (context, index) {
             final person = people[index];
-            return Card(
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero, // Set border radius to zero
-              ),
-              color: Colors.white,
-              child: Column(
-                children: [
-                  Image.asset(
-                    person.image,
-                    width: 150,
-                    height: 150,
-                    fit: BoxFit.cover,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: Text(
-                      person.name,
-                      style: const TextStyle(fontSize: 16),
+            return SizedBox(
+              width: maxGridBlockSize, // Set the width to limit the size
+              height: maxGridBlockSize, // Set the height to limit the size
+              child: Card(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                color: Colors.white,
+                child: Column(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Center the content vertically
+                  children: [
+                    Image.asset(
+                      person.image,
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: Text(
-                      person.school, // Display the school information
-                      style: const TextStyle(fontSize: 14),
+                    Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: Center(
+                        // Center the text horizontally
+                        child: Text(
+                          person.name,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: Center(
+                        // Center the text horizontally
+                        child: Text(
+                          person.school,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
