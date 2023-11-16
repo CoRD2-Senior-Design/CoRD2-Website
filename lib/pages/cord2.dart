@@ -1,13 +1,17 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:latlong2/latlong.dart';
 
-class Cord2 extends StatelessWidget{
+class Cord2 extends StatefulWidget {
   const Cord2({super.key});
-  static const CameraPosition _ucf = CameraPosition(
-    target: LatLng(28.6024, -81.2001),
-    zoom: 14.4746
-  );
+
+  @override
+  Cord2State createState() => Cord2State();
+}
+
+class Cord2State extends State<Cord2>{
 
   AutoSizeText _createText(String text, TextStyle style, double fontSize) {
     return AutoSizeText(text, style: style.copyWith(fontSize: fontSize)
@@ -94,7 +98,41 @@ class Cord2 extends StatelessWidget{
           defaultFont * fontScaling,
           const EdgeInsets.only(left: 20.0, bottom: 20.0)
         ),
-        _createText("ArcGIS Map will go here", boldStyle, defaultFont * fontScaling)
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: 500, maxWidth: (screenWidth * 0.75)),
+          child: Stack(
+            children: [
+              FlutterMap(
+                options: const MapOptions(
+                    initialCenter: LatLng(28.6026, -81.2001),
+                    initialZoom: 6
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'dev.cord2.map',
+                    tileProvider: CancellableNetworkTileProvider(),
+                  ),
+                ]
+              ),
+              Container(
+                color: const Color.fromRGBO(0, 0, 0, 0.75),
+                width: screenWidth,
+                height: 30,
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: Text("CoRD2 Map", style: TextStyle(color: Colors.white))
+                    )
+                  ])
+              )
+            ],
+          )
+
+        )
       ],
     );
   }
@@ -105,9 +143,11 @@ class Cord2 extends StatelessWidget{
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold (
-        body: Center(
+      body: SelectionArea(
+        child: Center(
             child: _createPageContent(width)
         ),
+      )
     );
   }
 }

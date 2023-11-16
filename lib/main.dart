@@ -88,20 +88,20 @@ class _NavBarState extends State<NavBar>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const <Widget>[
-          Center(
+        children: <Widget>[
+          const Center(
             child: Text("Home Page Goes Here"),
           ),
-          Center(
+          const Center(
             child: Text("People Page Goes Here"),
           ),
           Center(
             child: Cord2(),
           ),
-          Center(
+          const Center(
             child: Text("Publications Page Goes Here"),
           ),
-          Center(
+          const Center(
             child: Text("Projects Page Goes Here"),
           ),
         ],
