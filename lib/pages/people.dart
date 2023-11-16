@@ -113,7 +113,7 @@ class PeoplePage extends StatelessWidget {
     Person(
         name: 'Tarina Sadek',
         image: 'tarina.jpg',
-        school: 'Under Grad Student, University of Central Florida'),
+        school: 'Undergrad Student, University of Central Florida'),
     Person(
         name: 'Menachem Jaimovich',
         image: 'mendy.jpg',
