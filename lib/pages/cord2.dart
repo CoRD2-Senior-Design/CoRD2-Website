@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cord2_website/models/geo_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
 
 class Cord2 extends StatefulWidget {
   const Cord2({super.key});
@@ -12,9 +16,53 @@ class Cord2 extends StatefulWidget {
 }
 
 class Cord2State extends State<Cord2>{
+  late List<Marker> _markers = [];
+  @override
+  void initState() {
+    super.initState();
+    fetchGeoData();
+  }
 
   AutoSizeText _createText(String text, TextStyle style, double fontSize) {
     return AutoSizeText(text, style: style.copyWith(fontSize: fontSize)
+    );
+  }
+
+  void fetchGeoData() async {
+    final response = await http.get(Uri.parse("https://us-central1-subtle-torus-393918.cloudfunctions.net/get-geoinfo"));
+    List<Marker> list = [];
+    list.add(Marker(
+      point: LatLng(28.6026, -81.2001),
+      width: 56,
+      height: 56,
+      child: customMarker(28.6026, -81.2001)
+    ));
+    if (response.statusCode == 200) {
+      List<dynamic> geoList = json.decode(response.body);
+      for (var geo in geoList) {
+        GeoData data = GeoData.fromJson(geo);
+        if (data.latitude >= -90 && data.latitude <= 90) {
+          list.add(Marker(
+              point: LatLng(data.latitude, data.longitude),
+              width: 56,
+              height: 56,
+              child: customMarker(data.latitude, data.longitude)
+          ));
+        }
+      }
+    }
+    setState(() {
+      _markers = list;
+    });
+  }
+
+  MouseRegion customMarker(double lat, double lon) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => print("Selected point $lat, $lon"),
+        child: const Icon(Icons.person_pin_circle)
+      )
     );
   }
 
@@ -99,7 +147,7 @@ class Cord2State extends State<Cord2>{
           const EdgeInsets.only(left: 20.0, bottom: 20.0)
         ),
         ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 500, maxWidth: (screenWidth * 0.75)),
+          constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.75)),
           child: Stack(
             children: [
               FlutterMap(
@@ -113,6 +161,7 @@ class Cord2State extends State<Cord2>{
                     userAgentPackageName: 'dev.cord2.map',
                     tileProvider: CancellableNetworkTileProvider(),
                   ),
+                  MarkerLayer(markers: _markers)
                 ]
               ),
               Container(
@@ -128,7 +177,7 @@ class Cord2State extends State<Cord2>{
                       child: Text("CoRD2 Map", style: TextStyle(color: Colors.white))
                     )
                   ])
-              )
+              ),
             ],
           )
 
