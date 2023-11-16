@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './pages/home_page.dart';
 
 void main() => runApp(const CordWebsite());
 
@@ -21,14 +22,14 @@ class NavBar extends StatefulWidget {
   State<NavBar> createState() => _NavBarState();
 }
 
-class _NavBarState extends State<NavBar>
-    with TickerProviderStateMixin {
+class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this, animationDuration: Duration.zero);
+    _tabController =
+        TabController(length: 5, vsync: this, animationDuration: Duration.zero);
   }
 
   @override
@@ -43,50 +44,53 @@ class _NavBarState extends State<NavBar>
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(0, 0, 0, 0.75),
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            const Flexible(
-              child: Text("SCC RiskComm", style: TextStyle(color: Colors.white)),
-            ),
-            Flexible(
-              flex: 2,
-              fit: FlexFit.loose,
-              child: TabBar(
-                indicator: const ShapeDecoration(
-                  color: Color.fromRGBO(255, 255, 255, 0.3),
-                  shape: Border(),
-                ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorColor: const Color.fromRGBO(255, 255, 255, 0.3),
-                dividerColor: Colors.transparent,
-                controller: _tabController,
-                tabs: const <Widget>[
-                  Tab(
-                    child: Text("HOME", style: TextStyle(color: Colors.white)),
-                  ),
-                  Tab(
-                    child: Text("PEOPLE", style: TextStyle(color: Colors.white)),
-                  ),
-                  Tab(
-                    child: Text("CORD2", style: TextStyle(color: Colors.white)),
-                  ),
-                  Tab(
-                    child: Text("PUBLICATIONS", style: TextStyle(color: Colors.white)),
-                  ),
-                  Tab(
-                    child: Text("PROJECTS", style: TextStyle(color: Colors.white)),
-                  ),
-                ]
-              )
-            )
-          ]
-        ),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              const Flexible(
+                child:
+                    Text("SCC RiskComm", style: TextStyle(color: Colors.white)),
+              ),
+              Flexible(
+                  flex: 2,
+                  fit: FlexFit.loose,
+                  child: TabBar(
+                      indicator: const ShapeDecoration(
+                        color: Color.fromRGBO(255, 255, 255, 0.3),
+                        shape: Border(),
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorColor: const Color.fromRGBO(255, 255, 255, 0.3),
+                      dividerColor: Colors.transparent,
+                      controller: _tabController,
+                      tabs: const <Widget>[
+                        Tab(
+                          child: Text("HOME",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        Tab(
+                          child: Text("PEOPLE",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        Tab(
+                          child: Text("CORD2",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        Tab(
+                          child: Text("PUBLICATIONS",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        Tab(
+                          child: Text("PROJECTS",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ]))
+            ]),
       ),
       body: TabBarView(
         controller: _tabController,
         children: const <Widget>[
           Center(
-            child: Text("Home Page Goes Here"),
+            child: HomePage(),
           ),
           Center(
             child: Text("People Page Goes Here"),
