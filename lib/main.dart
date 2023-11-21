@@ -1,3 +1,4 @@
+import 'package:cord2_website/pages/cord2.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const CordWebsite());
@@ -8,7 +9,10 @@ class CordWebsite extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(
+        fontFamily: 'sans-serif',
+        useMaterial3: true
+      ),
       home: const NavBar(),
     );
   }
@@ -46,7 +50,7 @@ class _NavBarState extends State<NavBar>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             const Flexible(
-              child: Text("SCC RiskComm", style: TextStyle(color: Colors.white)),
+              child: SelectableText("SCC RiskComm", style: TextStyle(color: Colors.white)),
             ),
             Flexible(
               flex: 2,
@@ -84,20 +88,20 @@ class _NavBarState extends State<NavBar>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const <Widget>[
-          Center(
+        children: <Widget>[
+          const Center(
             child: Text("Home Page Goes Here"),
           ),
-          Center(
+          const Center(
             child: Text("People Page Goes Here"),
           ),
           Center(
-            child: Text("CORD2 Page Goes Here"),
+            child: Cord2(),
           ),
-          Center(
+          const Center(
             child: Text("Publications Page Goes Here"),
           ),
-          Center(
+          const Center(
             child: Text("Projects Page Goes Here"),
           ),
         ],
