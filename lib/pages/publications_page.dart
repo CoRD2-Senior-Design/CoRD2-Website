@@ -62,46 +62,45 @@ class PublicationsPage extends StatelessWidget {
     );
   }
 
-  List<dynamic> getPublicationList(TextStyle bodyStyle, TextStyle linkStyle) {
+  static List<dynamic> getPublicationList(TextStyle bodyStyle,
+      [TextStyle? linkStyle]) {
     return [
-      _displayPublication(
+      displayReference(
         'Huang, C. Derrick and Baghersad, Milad and Behara, Ravi S. and Zobel, Christopher W. “Optimal Investment in Prevention and Recovery for Mitigating Epidemic Risks” Risk Analysis , 2021 ',
         bodyStyle,
-        linkStyle,
         'https://doi.org/10.1111/risa.13707',
+        linkStyle,
       ),
-      _displayPublication(
+      displayReference(
         'Martín, Yago and Li, Zhenlong and Ge, Yue and Huang, Xiao “Introducing Twitter Daily Estimates of Residents and Non-Residents at the County Level” Social Sciences , v.10 , 2021 ',
         bodyStyle,
-        linkStyle,
         'https://doi.org/10.3390/socsci10060227',
+        linkStyle,
       ),
-      _displayPublication(
+      displayReference(
         'Pamukcu, D. and Zobel, C.W. and Ge, Y. “Analysis of Orange County 311 System service requests during the COVID-19 pandemic” Proceedings of the 18th International Conference on Information Systems for Crisis Response and Management , 2021',
         bodyStyle,
-        linkStyle,
       )
     ];
   }
 }
 
-dynamic _displayPublication(
-    String publicationText, TextStyle bodyStyle, TextStyle linkStyle,
-    [String? publicationLink]) {
+dynamic displayReference(String referenceText, TextStyle bodyStyle,
+    [String? referenceLink, TextStyle? linkStyle]) {
   return RichText(
     text: TextSpan(
       style: bodyStyle,
       children: <TextSpan>[
         TextSpan(
-          text: publicationText,
+          text: referenceText,
           style: bodyStyle,
         ),
-        if (publicationLink != null)
+        if (referenceLink != null)
           TextSpan(
-            text: publicationLink,
+            text: referenceLink,
             style: linkStyle,
             recognizer: TapGestureRecognizer()
-              ..onTap = () => launchUrl(Uri.parse(publicationLink)),
+              ..onTap = () => launchUrl(Uri.parse(referenceLink)),
           ),
       ],
     ),
