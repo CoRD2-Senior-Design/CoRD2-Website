@@ -20,49 +20,10 @@ class Cord2State extends State<Cord2>{
   @override
   void initState() {
     super.initState();
-    fetchGeoData();
   }
 
   AutoSizeText _createText(String text, TextStyle style, double fontSize) {
     return AutoSizeText(text, style: style.copyWith(fontSize: fontSize)
-    );
-  }
-
-  void fetchGeoData() async {
-    final response = await http.get(Uri.parse("https://us-central1-subtle-torus-393918.cloudfunctions.net/get-geoinfo"));
-    List<Marker> list = [];
-    list.add(Marker(
-      point: LatLng(28.6026, -81.2001),
-      width: 56,
-      height: 56,
-      child: customMarker(28.6026, -81.2001)
-    ));
-    if (response.statusCode == 200) {
-      List<dynamic> geoList = json.decode(response.body);
-      for (var geo in geoList) {
-        GeoData data = GeoData.fromJson(geo);
-        if (data.latitude >= -90 && data.latitude <= 90) {
-          list.add(Marker(
-              point: LatLng(data.latitude, data.longitude),
-              width: 56,
-              height: 56,
-              child: customMarker(data.latitude, data.longitude)
-          ));
-        }
-      }
-    }
-    setState(() {
-      _markers = list;
-    });
-  }
-
-  MouseRegion customMarker(double lat, double lon) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () => print("Selected point $lat, $lon"),
-        child: const Icon(Icons.person_pin_circle)
-      )
     );
   }
 
