@@ -227,7 +227,21 @@ class Cord2State extends State<Cord2>{
           )
       );
     } else {
-      return Text("Select a marker");
+      return Container(
+          color: const Color.fromRGBO(83, 83, 83, 0.5),
+          child: const Padding(
+            padding: EdgeInsets.all(5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Select a Marker to View Information",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ]
+            )
+          )
+      );
     }
   }
 
