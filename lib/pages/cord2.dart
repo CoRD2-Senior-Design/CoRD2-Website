@@ -1,12 +1,29 @@
-import 'dart:convert';
-
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cord2_website/models/geo_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:http/http.dart' as http;
+
+class MarkerData {
+  final String title;
+  final String creator;
+  final String description;
+  final double latitude;
+  final double longitude;
+  final String eventType;
+  final DateTime time;
+
+  MarkerData(
+      this.title,
+      this.creator,
+      this.description,
+      this.latitude,
+      this.longitude,
+      this.eventType,
+      this.time
+      );
+}
 
 class Cord2 extends StatefulWidget {
   const Cord2({super.key});
@@ -16,10 +33,66 @@ class Cord2 extends StatefulWidget {
 }
 
 class Cord2State extends State<Cord2>{
+  CollectionReference events = FirebaseFirestore.instance.collection("events");
+  CollectionReference users = FirebaseFirestore.instance.collection("users");
   late List<Marker> _markers = [];
+  MarkerData? _selectedMarker;
+
   @override
   void initState() {
     super.initState();
+    createMarkers();
+  }
+
+  void createMarkers() async {
+    List<Marker> markers = [];
+    // Get docs from collection reference
+    QuerySnapshot querySnapshot = await events.get();
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data()as Map<String, dynamic>).toList();
+
+    // loop through allData and add markers there
+    for (var point in allData) {
+      String theUser = point['creator'];
+      DocumentSnapshot doc = await users.doc(theUser).get();
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      // if active show/add, otherwise dont show
+      if (point['active'] == true) {
+        //print('DANGER ZONE!');
+        markers.add(Marker(
+            point: LatLng(point['latitude'] as double, point['longitude'] as double),
+            width: 56,
+            height: 56,
+            child: customMarker(
+              point['title'],
+              data['name'],
+              point['description'],
+              point['latitude']as double,
+              point['longitude'] as double,
+              point['eventType'],
+              point['time'].toDate(),
+            )
+        ));
+      }
+    }
+
+    setState(() {
+      _markers = markers;
+    });
+
+  }
+
+  MouseRegion customMarker(title, user, desc, lat, lon, eType, timeSub) {
+    return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+            onTap: () => setState(() {
+              _selectedMarker = MarkerData(title, user, desc, lat, lon, eType, timeSub);
+            }),
+            child: const Icon(Icons.person_pin_circle_rounded)
+        )
+    );
   }
 
   AutoSizeText _createText(String text, TextStyle style, double fontSize) {
@@ -107,44 +180,92 @@ class Cord2State extends State<Cord2>{
           defaultFont * fontScaling,
           const EdgeInsets.only(left: 20.0, bottom: 20.0)
         ),
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.75)),
-          child: Stack(
-            children: [
-              FlutterMap(
-                options: const MapOptions(
-                    initialCenter: LatLng(28.6026, -81.2001),
-                    initialZoom: 6
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'dev.cord2.map',
-                    tileProvider: CancellableNetworkTileProvider(),
-                  ),
-                  MarkerLayer(markers: _markers)
-                ]
+        Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.75)),
+              child: renderMap(screenWidth),
               ),
-              Container(
-                color: const Color.fromRGBO(0, 0, 0, 0.75),
-                width: screenWidth,
-                height: 30,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                      child: Text("CoRD2 Map", style: TextStyle(color: Colors.white))
-                    )
-                  ])
+            ),
+            Expanded(
+              flex: 1,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.25)),
+                child: renderSelection(),
               ),
-            ],
-          )
-
+            )
+          ]
         )
       ],
     );
+  }
+
+  Widget renderSelection() {
+    final _selectedMarker = this._selectedMarker;
+    if (_selectedMarker != null) {
+      return Container(
+          color: const Color.fromRGBO(83, 83, 83, 0.5),
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Report Title: ${_selectedMarker.title}",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "Uploaded By: ${_selectedMarker.creator}"
+                  ),
+                  Text(
+                    "Report Description: ${_selectedMarker.description}",
+                  )
+                ]
+            )
+          )
+      );
+    } else {
+      return Text("Select a marker");
+    }
+  }
+
+  Widget renderMap(double screenWidth) {
+    return Stack(
+      children: [
+        FlutterMap(
+            options: const MapOptions(
+                initialCenter: LatLng(28.6026, -81.2001),
+                initialZoom: 6
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'dev.cord2.map',
+                tileProvider: CancellableNetworkTileProvider(),
+              ),
+              MarkerLayer(markers: _markers)
+            ]
+        ),
+        Container(
+          color: const Color.fromRGBO(0, 0, 0, 0.75),
+          width: screenWidth,
+          height: 30,
+          child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: Text("CoRD2 Map", style: TextStyle(color: Colors.white))
+                )
+              ]
+          ),
+        ),
+      ]
+    );
+
   }
 
 

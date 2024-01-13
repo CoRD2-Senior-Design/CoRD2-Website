@@ -1,7 +1,16 @@
 import 'package:cord2_website/pages/cord2.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const CordWebsite());
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const CordWebsite());
+}
 
 class CordWebsite extends StatelessWidget {
   const CordWebsite({super.key});
