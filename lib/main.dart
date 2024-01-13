@@ -1,5 +1,7 @@
 import 'package:cord2_website/pages/cord2.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cord2_website/pages/people.dart';
+import 'package:cord2_website/pages/projects.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
@@ -50,49 +52,56 @@ class _NavBarState extends State<NavBar>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Scaffold buildDrawer() {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(0, 0, 0, 0.75),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        title: const SelectableText("SCC RiskComm",
+            style: TextStyle(color: Colors.white)),
+      ),
+      drawer: Drawer(
+        child: ListView(
           children: <Widget>[
-            const Flexible(
-              child: SelectableText("SCC RiskComm", style: TextStyle(color: Colors.white)),
+            SelectableText("SCC RiskComm", style: TextStyle(color: Colors.white)),
+            ListTile(
+              title: const Text("HOME"),
+              onTap: () {
+                // Navigate to the home page.
+                Navigator.of(context).pop();
+                _tabController.animateTo(0);
+              },
             ),
-            Flexible(
-              flex: 2,
-              fit: FlexFit.loose,
-              child: TabBar(
-                indicator: const ShapeDecoration(
-                  color: Color.fromRGBO(255, 255, 255, 0.3),
-                  shape: Border(),
-                ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorColor: const Color.fromRGBO(255, 255, 255, 0.3),
-                dividerColor: Colors.transparent,
-                controller: _tabController,
-                tabs: const <Widget>[
-                  Tab(
-                    child: Text("HOME", style: TextStyle(color: Colors.white)),
-                  ),
-                  Tab(
-                    child: Text("PEOPLE", style: TextStyle(color: Colors.white)),
-                  ),
-                  Tab(
-                    child: Text("CORD2", style: TextStyle(color: Colors.white)),
-                  ),
-                  Tab(
-                    child: Text("PUBLICATIONS", style: TextStyle(color: Colors.white)),
-                  ),
-                  Tab(
-                    child: Text("PROJECTS", style: TextStyle(color: Colors.white)),
-                  ),
-                ]
-              )
-            )
-          ]
+            ListTile(
+              title: const Text("PEOPLE"),
+              onTap: () {
+                // Navigate to the people page.
+                Navigator.of(context).pop();
+                _tabController.animateTo(1);
+              },
+            ),
+            ListTile(
+              title: const Text("CORD2"),
+              onTap: () {
+                Navigator.of(context).pop();
+                _tabController.animateTo(2);
+              },
+            ),
+            ListTile(
+              title: const Text("PUBLICATIONS"),
+              onTap: () {
+                Navigator.of(context).pop();
+                _tabController.animateTo(3);
+              },
+            ),
+            ListTile(
+              title: const Text("PROJECTS"),
+              onTap: () {
+                Navigator.of(context).pop();
+                _tabController.animateTo(4);
+              },
+            ),
+            // Add more drawer items as needed.
+          ],
         ),
       ),
       body: TabBarView(
@@ -101,20 +110,97 @@ class _NavBarState extends State<NavBar>
           const Center(
             child: Text("Home Page Goes Here"),
           ),
+          Center(
+            child: PeoplePage(),
+          ),
           const Center(
-            child: Text("People Page Goes Here"),
+            child: Cord2()
+          ),
+          const Center(
+            child: Text("Publications Page Goes Here"),
+          ),
+          const Center(
+            child: ProjectsPage(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Scaffold buildNav() {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color.fromRGBO(0, 0, 0, 0.75),
+        title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              const Flexible(
+                child: Text("SCC RiskComm", style: TextStyle(color: Colors.white)),
+              ),
+              Flexible(
+                  flex: 2,
+                  fit: FlexFit.loose,
+                  child: TabBar(
+                      indicator: const ShapeDecoration(
+                        color: Color.fromRGBO(255, 255, 255, 0.3),
+                        shape: Border(),
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorColor: const Color.fromRGBO(255, 255, 255, 0.3),
+                      dividerColor: Colors.transparent,
+                      controller: _tabController,
+                      tabs: const <Widget>[
+                        Tab(
+                          child: Text("HOME", style: TextStyle(color: Colors.white)),
+                        ),
+                        Tab(
+                          child: Text("PEOPLE", style: TextStyle(color: Colors.white)),
+                        ),
+                        Tab(
+                          child: Text("CORD2", style: TextStyle(color: Colors.white)),
+                        ),
+                        Tab(
+                          child: Text("PUBLICATIONS", style: TextStyle(color: Colors.white)),
+                        ),
+                        Tab(
+                          child: Text("PROJECTS", style: TextStyle(color: Colors.white)),
+                        ),
+                      ]
+                  )
+              )
+            ]
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: <Widget>[
+          const Center(
+            child: Text("Home Page Goes Here"),
           ),
           Center(
+            child: PeoplePage(),
+          ),
+          const Center(
             child: Cord2(),
           ),
           const Center(
             child: Text("Publications Page Goes Here"),
           ),
           const Center(
-            child: Text("Projects Page Goes Here"),
+            child: ProjectsPage(),
           ),
         ],
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 1000;
+    if (isSmallScreen) {
+      return buildDrawer();
+    } else {
+      return buildNav();
+    }
   }
 }
