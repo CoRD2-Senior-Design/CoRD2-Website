@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
 class MarkerData {
@@ -53,26 +54,23 @@ class Cord2State extends State<Cord2>{
 
     // loop through allData and add markers there
     for (var point in allData) {
-      String theUser = point['creator'];
-      DocumentSnapshot doc = await users.doc(theUser).get();
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
       // if active show/add, otherwise dont show
       if (point['active'] == true) {
+        MarkerData markerData = MarkerData(
+            point['title'],
+            point['creator'],
+            point['description'],
+            point['latitude'] as double,
+            point['longitude'] as double,
+            point['eventType'],
+            point['time'].toDate()
+        );
         //print('DANGER ZONE!');
         markers.add(Marker(
             point: LatLng(point['latitude'] as double, point['longitude'] as double),
             width: 56,
             height: 56,
-            child: customMarker(
-              point['title'],
-              data['name'],
-              point['description'],
-              point['latitude']as double,
-              point['longitude'] as double,
-              point['eventType'],
-              point['time'].toDate(),
-            )
+            child: customMarker(markerData)
         ));
       }
     }
@@ -83,16 +81,31 @@ class Cord2State extends State<Cord2>{
 
   }
 
-  MouseRegion customMarker(title, user, desc, lat, lon, eType, timeSub) {
+  MouseRegion customMarker(MarkerData data) {
     return MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-            onTap: () => setState(() {
-              _selectedMarker = MarkerData(title, user, desc, lat, lon, eType, timeSub);
-            }),
+            onTap: () => handleMarkerSelect(data),
             child: const Icon(Icons.person_pin_circle_rounded)
         )
     );
+  }
+
+  void handleMarkerSelect(MarkerData data) async {
+    String theUser = data.creator;
+    DocumentSnapshot doc = await users.doc(theUser).get();
+    Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
+    setState(() {
+      _selectedMarker = MarkerData(
+          data.title,
+          userData['name'],
+          data.description,
+          data.latitude,
+          data.longitude,
+          data.eventType,
+          data.time
+      );
+    });
   }
 
   AutoSizeText _createText(String text, TextStyle style, double fontSize) {
@@ -221,6 +234,9 @@ class Cord2State extends State<Cord2>{
                   ),
                   Text(
                     "Report Description: ${_selectedMarker.description}",
+                  ),
+                  Text(
+                    "Report Date: ${DateFormat.yMEd().add_jms().format(_selectedMarker.time)}"
                   )
                 ]
             )
