@@ -305,7 +305,7 @@ class Cord2State extends State<Cord2>{
                   Text(
                     "Report Date: ${DateFormat.yMEd().add_jms().format(_selectedMarker.time)}"
                   ),
-                  GestureDetector(
+                  if (FirebaseAuth.instance.currentUser != null) GestureDetector(
                     onTap: () => handleUserChat(),
                     child: const Text.rich(
                       TextSpan(

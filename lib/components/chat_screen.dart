@@ -129,20 +129,6 @@ class _MessagePageState extends State<MessagePage> {
       "participants": widget.chat.participants
     };
     var res = await chatRef.update(updates);
-    // await chatRef.update({
-    //   widget.chat.participants[0]: {
-    //     widget.chat.id: {
-    //       "lastUpdate": DateTime.now().toString(),
-    //       "participants": widget.chat.participants
-    //     }
-    //   },
-    //   widget.chat.participants[1]: {
-    //     widget.chat.id: {
-    //       "lastUpdate": DateTime.now().toString(),
-    //       "participants": widget.chat.participants
-    //     }
-    //   }
-    // });
     textController.clear();
   }
 
@@ -165,14 +151,19 @@ class _MessagePageState extends State<MessagePage> {
           ),
           Expanded(
               child: ElevatedButton(
-                  onPressed: sendMessage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(blurple),
-                    shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(15))
-                    ),
+                onPressed: sendMessage,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(blurple),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15))
                   ),
-                  child: Text("send", style: whiteText)
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.arrow_upward_rounded,
+                    color: Colors.white
+                  )
+                ),
               )
           )
         ]

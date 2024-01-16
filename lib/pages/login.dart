@@ -13,7 +13,7 @@ class LoginPageState extends State<LoginPage>{
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   TextEditingController emailController = TextEditingController();
   TextEditingController passController = TextEditingController();
-  bool _isAuth = false;
+  late bool _isAuth;
 
   @override
   void initState() {
@@ -22,13 +22,11 @@ class LoginPageState extends State<LoginPage>{
   }
 
   void checkUser() {
-    setState(() {
-      _isAuth = FirebaseAuth.instance.currentUser == null;
-    });
+    _isAuth = FirebaseAuth.instance.currentUser == null;
   }
 
   void signOut() async {
-    await FirebaseAuth.instance.signOut();
+    var res = await FirebaseAuth.instance.signOut();
     setState(() {_isAuth = false;});
   }
 
@@ -43,7 +41,7 @@ class LoginPageState extends State<LoginPage>{
       DocumentSnapshot user = await users.doc(credential.user?.uid).get();
       Map<String, dynamic> data = user.data() as Map<String, dynamic>;
       if (!data['isResponder']) {
-        FirebaseAuth.instance.signOut();
+        var res = FirebaseAuth.instance.signOut();
       } else {
         setState(() {
           _isAuth = true;
@@ -77,11 +75,11 @@ class LoginPageState extends State<LoginPage>{
                 )
               ),
               FractionallySizedBox(
-                  widthFactor: 0.8,
-                  child: ElevatedButton(
-                      onPressed: () => signOut(),
-                      child: Text("Logout")
-                  )
+                widthFactor: 0.8,
+                child: ElevatedButton(
+                    onPressed: () => signOut(),
+                    child: Text("Logout")
+                )
               )
             ]
           )
@@ -135,14 +133,20 @@ class LoginPageState extends State<LoginPage>{
     );
   }
 
+  Widget renderCard() {
+    if (_isAuth) {
+      return welcomeCard();
+    } else {
+      return loginCard();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold (
-        body: SelectionArea(
-          child: Center(
-              child: _isAuth ? loginCard() : welcomeCard()
-          ),
-        )
+      body: Center(
+          child: renderCard()
+      ),
     );
   }
 }
