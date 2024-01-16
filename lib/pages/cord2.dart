@@ -1,13 +1,19 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cord2_website/components/chat_screen.dart';
+import 'package:cord2_website/models/chat_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:uuid/uuid.dart';
 
 class MarkerData {
   final String title;
+  final String creatorId;
   final String creator;
   final String description;
   final double latitude;
@@ -17,6 +23,7 @@ class MarkerData {
 
   MarkerData(
       this.title,
+      this.creatorId,
       this.creator,
       this.description,
       this.latitude,
@@ -37,7 +44,11 @@ class Cord2State extends State<Cord2>{
   CollectionReference events = FirebaseFirestore.instance.collection("events");
   CollectionReference users = FirebaseFirestore.instance.collection("users");
   late List<Marker> _markers = [];
+  bool _info = true;
   MarkerData? _selectedMarker;
+  final int blurple = 0xff20297A;
+  late ChatModel _selectedChat;
+
 
   @override
   void initState() {
@@ -59,13 +70,13 @@ class Cord2State extends State<Cord2>{
         MarkerData markerData = MarkerData(
             point['title'],
             point['creator'],
+            "",
             point['description'],
             point['latitude'] as double,
             point['longitude'] as double,
             point['eventType'],
             point['time'].toDate()
         );
-        //print('DANGER ZONE!');
         markers.add(Marker(
             point: LatLng(point['latitude'] as double, point['longitude'] as double),
             width: 56,
@@ -92,12 +103,14 @@ class Cord2State extends State<Cord2>{
   }
 
   void handleMarkerSelect(MarkerData data) async {
-    String theUser = data.creator;
+    String theUser = data.creatorId;
     DocumentSnapshot doc = await users.doc(theUser).get();
     Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
     setState(() {
+      _info = true;
       _selectedMarker = MarkerData(
           data.title,
+          data.creatorId,
           userData['name'],
           data.description,
           data.latitude,
@@ -196,23 +209,77 @@ class Cord2State extends State<Cord2>{
         Row(
           children: [
             Expanded(
-              flex: 3,
+              flex: 2,
               child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.75)),
               child: renderMap(screenWidth),
               ),
             ),
             Expanded(
-              flex: 1,
+              flex: 2,
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.25)),
-                child: renderSelection(),
+                child: _info ? renderSelection() : MessagePage(chat: _selectedChat, closeChat: () => setState(() {_info = true;})),
               ),
             )
           ]
         )
       ],
     );
+  }
+
+  void handleUserChat() async {
+    final selectedMarker = this._selectedMarker;
+    DatabaseReference ref = FirebaseDatabase.instance.ref('chats/${FirebaseAuth.instance.currentUser?.uid}');
+    DataSnapshot snapshot = await ref.get();
+    for (DataSnapshot val in snapshot.children) {
+      final map = val.value as Map?;
+      List<String> participants = map?['participants'].map<String>((val) => val.toString()).toList();
+      bool match = false;
+      for (Object? part in map?['participants']) {
+        Map<String, String> participant = {};
+        if (part.toString() == selectedMarker?.creatorId) {
+          match = true;
+          DocumentSnapshot doc = await users.doc(part.toString()).get();
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          participant['name'] = data['name'];
+          participant['uid'] = part.toString();
+          DateTime lastUpdate = DateTime.parse(map!['lastUpdate'].toString());
+          setState(() {
+            _selectedChat = ChatModel(participant, participants, lastUpdate, val.key);
+            _info = false;
+          });
+        }
+      }
+      if (match) return;
+    }
+    var chatId = Uuid().v4();
+    DatabaseReference newChat = FirebaseDatabase.instance.ref('chats/${selectedMarker?.creatorId}/$chatId');
+    var res =await newChat.update({
+      "lastUpdate": DateTime.now().toString(),
+      "participants": ["${selectedMarker?.creatorId}", "${FirebaseAuth.instance.currentUser?.uid}"]
+    });
+    ref = FirebaseDatabase.instance.ref('chats/${FirebaseAuth.instance.currentUser?.uid}/$chatId');
+    res = await ref.update({
+      "lastUpdate": DateTime.now().toString(),
+      "participants": ["${selectedMarker?.creatorId}", "${FirebaseAuth.instance.currentUser?.uid}"]
+    });
+    DatabaseReference newMsg = FirebaseDatabase.instance.ref('msgs');
+    res = await newMsg.update({
+      chatId: []
+    });
+    Map<String, String> participant = {};
+    DocumentSnapshot doc = await users.doc(selectedMarker?.creatorId.toString()).get();
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    participant['name'] = data['name'];
+    participant['uid'] = selectedMarker!.creatorId.toString();
+    List<String> participants = [selectedMarker!.creatorId, FirebaseAuth.instance.currentUser!.uid];
+    DateTime lastUpdate = DateTime.now();
+
+    setState(() {
+      _selectedChat = ChatModel(participant, participants, lastUpdate, chatId);
+      _info = false;
+    });
   }
 
   Widget renderSelection() {
@@ -223,7 +290,7 @@ class Cord2State extends State<Cord2>{
           child: Padding(
             padding: const EdgeInsets.all(5),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Report Title: ${_selectedMarker.title}",
@@ -237,6 +304,18 @@ class Cord2State extends State<Cord2>{
                   ),
                   Text(
                     "Report Date: ${DateFormat.yMEd().add_jms().format(_selectedMarker.time)}"
+                  ),
+                  GestureDetector(
+                    onTap: () => handleUserChat(),
+                    child: const Text.rich(
+                      TextSpan(
+                        text: "Chat with this user",
+                        mouseCursor: MaterialStateMouseCursor.clickable,
+                        style: TextStyle(
+                          decoration: TextDecoration.underline
+                        )
+                      )
+                    )
                   )
                 ]
             )
@@ -244,19 +323,19 @@ class Cord2State extends State<Cord2>{
       );
     } else {
       return Container(
-          color: const Color.fromRGBO(83, 83, 83, 0.5),
-          child: const Padding(
-            padding: EdgeInsets.all(5),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Select a Marker to View Information",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ]
-            )
+        color: const Color.fromRGBO(83, 83, 83, 0.5),
+        child: const Padding(
+          padding: EdgeInsets.all(5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Select a Marker to View Information",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ]
           )
+        )
       );
     }
   }
@@ -266,8 +345,8 @@ class Cord2State extends State<Cord2>{
       children: [
         FlutterMap(
             options: const MapOptions(
-                initialCenter: LatLng(28.6026, -81.2001),
-                initialZoom: 6
+              initialCenter: LatLng(28.6026, -81.2001),
+              initialZoom: 6
             ),
             children: [
               TileLayer(
@@ -283,14 +362,14 @@ class Cord2State extends State<Cord2>{
           width: screenWidth,
           height: 30,
           child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                    child: Text("CoRD2 Map", style: TextStyle(color: Colors.white))
-                )
-              ]
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                child: Text("CoRD2 Map", style: TextStyle(color: Colors.white))
+              )
+            ]
           ),
         ),
       ]

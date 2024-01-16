@@ -1,4 +1,5 @@
 import 'package:cord2_website/pages/cord2.dart';
+import 'package:cord2_website/pages/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cord2_website/pages/people.dart';
 import 'package:cord2_website/pages/projects.dart';
@@ -43,7 +44,7 @@ class _NavBarState extends State<NavBar>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this, animationDuration: Duration.zero);
+    _tabController = TabController(length: 6, vsync: this, animationDuration: Duration.zero);
   }
 
   @override
@@ -100,6 +101,13 @@ class _NavBarState extends State<NavBar>
                 _tabController.animateTo(4);
               },
             ),
+            ListTile(
+              title: const Text("FIRST RESPONDERS"),
+              onTap: () {
+                Navigator.of(context).pop();
+                _tabController.animateTo(5);
+              }
+            )
             // Add more drawer items as needed.
           ],
         ),
@@ -122,6 +130,9 @@ class _NavBarState extends State<NavBar>
           const Center(
             child: ProjectsPage(),
           ),
+          const Center(
+            child: LoginPage()
+          )
         ],
       ),
     );
@@ -165,6 +176,9 @@ class _NavBarState extends State<NavBar>
                         Tab(
                           child: Text("PROJECTS", style: TextStyle(color: Colors.white)),
                         ),
+                        Tab(
+                          child: Text("FIRST RESPONDERS", style: TextStyle(color: Colors.white)),
+                        )
                       ]
                   )
               )
@@ -189,6 +203,9 @@ class _NavBarState extends State<NavBar>
           const Center(
             child: ProjectsPage(),
           ),
+          const Center(
+            child: LoginPage()
+          )
         ],
       ),
     );
