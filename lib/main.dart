@@ -1,5 +1,8 @@
+import 'package:cord2_website/pages/people.dart';
+import 'package:cord2_website/pages/projects.dart';
+import 'package:cord2_website/pages/publications_page.dart';
 import 'package:flutter/material.dart';
-import './pages/publications_page.dart';
+import './pages/home_page.dart';
 
 void main() => runApp(const CordWebsite());
 
@@ -38,8 +41,81 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Scaffold buildDrawer() {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color.fromRGBO(0, 0, 0, 0.75),
+        title: const SelectableText("SCC RiskComm",
+            style: TextStyle(color: Colors.white)),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            ListTile(
+              title: const Text("HOME"),
+              onTap: () {
+                // Navigate to the home page.
+                Navigator.of(context).pop();
+                _tabController.animateTo(0);
+              },
+            ),
+            ListTile(
+              title: const Text("PEOPLE"),
+              onTap: () {
+                // Navigate to the people page.
+                Navigator.of(context).pop();
+                _tabController.animateTo(1);
+              },
+            ),
+            ListTile(
+              title: const Text("CORD2"),
+              onTap: () {
+                Navigator.of(context).pop();
+                _tabController.animateTo(2);
+              },
+            ),
+            ListTile(
+              title: const Text("PUBLICATIONS"),
+              onTap: () {
+                Navigator.of(context).pop();
+                _tabController.animateTo(3);
+              },
+            ),
+            ListTile(
+              title: const Text("PROJECTS"),
+              onTap: () {
+                Navigator.of(context).pop();
+                _tabController.animateTo(4);
+              },
+            ),
+            // Add more drawer items as needed.
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: <Widget>[
+          const Center(
+            child: HomePage(),
+          ),
+          Center(
+            child: PeoplePage(),
+          ),
+          const Center(
+            child: Text("CORD2 Page Goes Here"),
+          ),
+          const Center(
+            child: PublicationsPage(),
+          ),
+          const Center(
+            child: ProjectsPage(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Scaffold buildNav() {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(0, 0, 0, 0.75),
@@ -47,8 +123,7 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               const Flexible(
-                child:
-                    Text("SCC RiskComm", style: TextStyle(color: Colors.white)),
+                child: Text("SCC RiskComm", style: TextStyle(color: Colors.white)),
               ),
               Flexible(
                   flex: 2,
@@ -64,48 +139,56 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
                       controller: _tabController,
                       tabs: const <Widget>[
                         Tab(
-                          child: Text("HOME",
-                              style: TextStyle(color: Colors.white)),
+                          child: Text("HOME", style: TextStyle(color: Colors.white)),
                         ),
                         Tab(
-                          child: Text("PEOPLE",
-                              style: TextStyle(color: Colors.white)),
+                          child: Text("PEOPLE", style: TextStyle(color: Colors.white)),
                         ),
                         Tab(
-                          child: Text("CORD2",
-                              style: TextStyle(color: Colors.white)),
+                          child: Text("CORD2", style: TextStyle(color: Colors.white)),
                         ),
                         Tab(
-                          child: Text("PUBLICATIONS",
-                              style: TextStyle(color: Colors.white)),
+                          child: Text("PUBLICATIONS", style: TextStyle(color: Colors.white)),
                         ),
                         Tab(
-                          child: Text("PROJECTS",
-                              style: TextStyle(color: Colors.white)),
+                          child: Text("PROJECTS", style: TextStyle(color: Colors.white)),
                         ),
-                      ]))
-            ]),
+                      ]
+                  )
+              )
+            ]
+        ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const <Widget>[
-          Center(
-            child: Text("Home Page Goes Here"),
+        children: <Widget>[
+          const Center(
+            child: HomePage(),
           ),
           Center(
-            child: Text("People Page Goes Here"),
+            child: PeoplePage(),
           ),
-          Center(
+          const Center(
             child: Text("CORD2 Page Goes Here"),
           ),
-          Center(
+          const Center(
             child: PublicationsPage(),
           ),
-          Center(
-            child: Text("Projects Page Goes Here"),
+          const Center(
+            child: ProjectsPage(),
           ),
         ],
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 1000;
+    if (isSmallScreen) {
+      return buildDrawer();
+    } else {
+      return buildNav();
+    }
   }
 }
