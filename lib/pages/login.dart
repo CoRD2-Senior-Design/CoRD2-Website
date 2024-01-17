@@ -14,6 +14,8 @@ class LoginPageState extends State<LoginPage>{
   TextEditingController emailController = TextEditingController();
   TextEditingController passController = TextEditingController();
   late bool _isAuth;
+  late String _error = "";
+  bool _loading = false;
 
   @override
   void initState() {
@@ -22,7 +24,6 @@ class LoginPageState extends State<LoginPage>{
   }
 
   void checkUser() {
-    print(FirebaseAuth.instance.currentUser);
     setState(() {
       _isAuth = FirebaseAuth.instance.currentUser != null;
     });
@@ -35,6 +36,10 @@ class LoginPageState extends State<LoginPage>{
 
   void login() async {
     if (emailController.text.isEmpty || passController.text.isEmpty) {
+      setState(() {
+        _error = "Please fill out all fields";
+        _loading = false;
+      });
       return;
     }
 
@@ -44,18 +49,32 @@ class LoginPageState extends State<LoginPage>{
       DocumentSnapshot user = await users.doc(credential.user?.uid).get();
       Map<String, dynamic> data = user.data() as Map<String, dynamic>;
       if (!data['isResponder']) {
-        var res = FirebaseAuth.instance.signOut();
+        var res = await FirebaseAuth.instance.signOut();
       } else {
         setState(() {
+          _loading = false;
           _isAuth = true;
         });
       }
     } on FirebaseAuthException catch (e) {
+      print(e.code);
       if (e.code == 'user-not-found') {
+        setState(() {
+          _error = "Unknown user/password";
+          _loading = false;
+        });
         return;
-      } else if (e.code == 'wrong-password') {
+      } else if (e.code == 'wrong-password' || e.code == "invalid-credential") {
+        setState(() {
+          _error = "Incorrect user/password";
+          _loading = false;
+        });
         return;
       } else {
+        setState(() {
+          _error = "An unknown error occurred, please try again";
+          _loading = false;
+        });
         return;
       }
     }
@@ -107,26 +126,45 @@ class LoginPageState extends State<LoginPage>{
                   style: TextStyle(fontSize: 25.0)
                 )
               ),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  hintText: "Email"
-                ),
-              ),
-              TextField(
-                controller: passController,
-                obscureText: true,
-                decoration: const InputDecoration(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
                     isDense: true,
-                    hintText: "Password"
+                    hintText: "Email"
+                  ),
                 ),
               ),
-              FractionallySizedBox(
-                widthFactor: 0.8,
-                child: ElevatedButton(
-                  onPressed: () => login(),
-                  child: Text("Login")
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: TextField(
+                  controller: passController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                      isDense: true,
+                      hintText: "Password"
+                  ),
+                ),
+              ),
+              if (_error.isNotEmpty) Container(
+                margin: const EdgeInsets.only(top: 15.0),
+                child: Text(_error, style: const TextStyle(color: Colors.red))
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 15.0),
+                child: FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _loading = true;
+                        _error = "";
+                      });
+                      login();
+                    },
+                      child: _loading ? const CircularProgressIndicator() : const Text("Login"),
+                  )
                 )
               )
             ]
