@@ -1,5 +1,6 @@
 import 'package:cord2_website/pages/people.dart';
 import 'package:cord2_website/pages/projects.dart';
+import 'package:cord2_website/pages/publications_page.dart';
 import 'package:flutter/material.dart';
 import './pages/home_page.dart';
 
@@ -104,7 +105,7 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
             child: Text("CORD2 Page Goes Here"),
           ),
           const Center(
-            child: Text("Publications Page Goes Here"),
+            child: PublicationsPage(),
           ),
           const Center(
             child: ProjectsPage(),
@@ -171,7 +172,7 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
             child: Text("CORD2 Page Goes Here"),
           ),
           const Center(
-            child: Text("Publications Page Goes Here"),
+            child: PublicationsPage(),
           ),
           const Center(
             child: ProjectsPage(),

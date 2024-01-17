@@ -52,7 +52,7 @@ class PeoplePage extends StatelessWidget {
         school: 'PhD Student, University of Central Florida'),
     Person(
         name: 'Naiyara Noor',
-        image: 'naiyara.jpg',
+        image: 'Naiyara.jpg',
         school: 'Graduate Fellow, University of Central Florida'),
     Person(
         name: 'Yang Gao',
