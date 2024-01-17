@@ -3,7 +3,9 @@ import 'package:cord2_website/pages/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cord2_website/pages/people.dart';
 import 'package:cord2_website/pages/projects.dart';
+import 'package:cord2_website/pages/publications_page.dart';
 import 'package:flutter/material.dart';
+import './pages/home_page.dart';
 
 import 'firebase_options.dart';
 
@@ -37,8 +39,7 @@ class NavBar extends StatefulWidget {
   State<NavBar> createState() => _NavBarState();
 }
 
-class _NavBarState extends State<NavBar>
-    with TickerProviderStateMixin {
+class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -116,7 +117,7 @@ class _NavBarState extends State<NavBar>
         controller: _tabController,
         children: <Widget>[
           const Center(
-            child: Text("Home Page Goes Here"),
+            child: HomePage(),
           ),
           Center(
             child: PeoplePage(),
@@ -125,7 +126,7 @@ class _NavBarState extends State<NavBar>
             child: Cord2()
           ),
           const Center(
-            child: Text("Publications Page Goes Here"),
+            child: PublicationsPage(),
           ),
           const Center(
             child: ProjectsPage(),
@@ -189,7 +190,7 @@ class _NavBarState extends State<NavBar>
         controller: _tabController,
         children: <Widget>[
           const Center(
-            child: Text("Home Page Goes Here"),
+            child: HomePage(),
           ),
           Center(
             child: PeoplePage(),
@@ -198,7 +199,7 @@ class _NavBarState extends State<NavBar>
             child: Cord2(),
           ),
           const Center(
-            child: Text("Publications Page Goes Here"),
+            child: PublicationsPage(),
           ),
           const Center(
             child: ProjectsPage(),
