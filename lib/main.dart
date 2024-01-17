@@ -1,6 +1,7 @@
 import 'package:cord2_website/pages/people.dart';
 import 'package:cord2_website/pages/projects.dart';
 import 'package:flutter/material.dart';
+import './pages/home_page.dart';
 
 void main() => runApp(const CordWebsite());
 
@@ -23,14 +24,14 @@ class NavBar extends StatefulWidget {
   State<NavBar> createState() => _NavBarState();
 }
 
-class _NavBarState extends State<NavBar>
-    with TickerProviderStateMixin {
+class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this, animationDuration: Duration.zero);
+    _tabController =
+        TabController(length: 5, vsync: this, animationDuration: Duration.zero);
   }
 
   @override
@@ -94,7 +95,7 @@ class _NavBarState extends State<NavBar>
         controller: _tabController,
         children: <Widget>[
           const Center(
-            child: Text("Home Page Goes Here"),
+            child: HomePage(),
           ),
           Center(
             child: PeoplePage(),
@@ -161,7 +162,7 @@ class _NavBarState extends State<NavBar>
         controller: _tabController,
         children: <Widget>[
           const Center(
-            child: Text("Home Page Goes Here"),
+            child: HomePage(),
           ),
           Center(
             child: PeoplePage(),
