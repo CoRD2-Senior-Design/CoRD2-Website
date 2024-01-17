@@ -292,18 +292,33 @@ class Cord2State extends State<Cord2>{
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Report Title: ${_selectedMarker.title}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 5.0),
+                    child: Text(
+                      "Report Title: ${_selectedMarker.title}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25.0,
+                      ),
+                    )
                   ),
-                  Text(
-                    "Uploaded By: ${_selectedMarker.creator}"
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 5.0),
+                    child: Text(
+                      "Uploaded By: ${_selectedMarker.creator}\nDate: ${DateFormat.yMEd().add_jms().format(_selectedMarker.time)}",
+                      style: const TextStyle(
+                        fontSize: 15.0,
+                      ),
+                    )
                   ),
-                  Text(
-                    "Report Description: ${_selectedMarker.description}",
-                  ),
-                  Text(
-                    "Report Date: ${DateFormat.yMEd().add_jms().format(_selectedMarker.time)}"
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 5.0),
+                    child: Text(
+                      "Report Description: ${_selectedMarker.description}",
+                      style: const TextStyle(
+                        fontSize: 15.0
+                      )
+                    ),
                   ),
                   if (FirebaseAuth.instance.currentUser != null) GestureDetector(
                     onTap: () => handleUserChat(),
@@ -312,11 +327,12 @@ class Cord2State extends State<Cord2>{
                         text: "Chat with this user",
                         mouseCursor: MaterialStateMouseCursor.clickable,
                         style: TextStyle(
-                          decoration: TextDecoration.underline
+                          decoration: TextDecoration.underline,
+                          fontSize: 15.0
                         )
                       )
                     )
-                  )
+                  ),
                 ]
             )
           )

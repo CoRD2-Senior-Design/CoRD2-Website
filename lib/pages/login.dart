@@ -22,7 +22,10 @@ class LoginPageState extends State<LoginPage>{
   }
 
   void checkUser() {
-    _isAuth = FirebaseAuth.instance.currentUser == null;
+    print(FirebaseAuth.instance.currentUser);
+    setState(() {
+      _isAuth = FirebaseAuth.instance.currentUser != null;
+    });
   }
 
   void signOut() async {
