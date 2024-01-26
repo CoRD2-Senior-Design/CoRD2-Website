@@ -1,10 +1,21 @@
+import 'package:cord2_website/pages/cord2.dart';
+import 'package:cord2_website/pages/login.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cord2_website/pages/people.dart';
 import 'package:cord2_website/pages/projects.dart';
 import 'package:cord2_website/pages/publications_page.dart';
 import 'package:flutter/material.dart';
 import './pages/home_page.dart';
 
-void main() => runApp(const CordWebsite());
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const CordWebsite());
+}
 
 class CordWebsite extends StatelessWidget {
   const CordWebsite({super.key});
@@ -12,7 +23,10 @@ class CordWebsite extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(
+        fontFamily: 'sans-serif',
+        useMaterial3: true
+      ),
       home: const NavBar(),
     );
   }
@@ -31,8 +45,7 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController =
-        TabController(length: 5, vsync: this, animationDuration: Duration.zero);
+    _tabController = TabController(length: 6, vsync: this, animationDuration: Duration.zero);
   }
 
   @override
@@ -51,6 +64,7 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
       drawer: Drawer(
         child: ListView(
           children: <Widget>[
+            SelectableText("SCC RiskComm", style: TextStyle(color: Colors.white)),
             ListTile(
               title: const Text("HOME"),
               onTap: () {
@@ -88,6 +102,13 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
                 _tabController.animateTo(4);
               },
             ),
+            ListTile(
+              title: const Text("FIRST RESPONDERS"),
+              onTap: () {
+                Navigator.of(context).pop();
+                _tabController.animateTo(5);
+              }
+            )
             // Add more drawer items as needed.
           ],
         ),
@@ -102,7 +123,7 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
             child: PeoplePage(),
           ),
           const Center(
-            child: Text("CORD2 Page Goes Here"),
+            child: Cord2()
           ),
           const Center(
             child: PublicationsPage(),
@@ -110,6 +131,9 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
           const Center(
             child: ProjectsPage(),
           ),
+          const Center(
+            child: LoginPage()
+          )
         ],
       ),
     );
@@ -153,6 +177,9 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
                         Tab(
                           child: Text("PROJECTS", style: TextStyle(color: Colors.white)),
                         ),
+                        Tab(
+                          child: Text("FIRST RESPONDERS", style: TextStyle(color: Colors.white)),
+                        )
                       ]
                   )
               )
@@ -169,7 +196,7 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
             child: PeoplePage(),
           ),
           const Center(
-            child: Text("CORD2 Page Goes Here"),
+            child: Cord2(),
           ),
           const Center(
             child: PublicationsPage(),
@@ -177,6 +204,9 @@ class _NavBarState extends State<NavBar> with TickerProviderStateMixin {
           const Center(
             child: ProjectsPage(),
           ),
+          const Center(
+            child: LoginPage()
+          )
         ],
       ),
     );
