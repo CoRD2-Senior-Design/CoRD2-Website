@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cord2_website/components/dashboard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -82,8 +83,8 @@ class LoginPageState extends State<LoginPage>{
 
   Widget welcomeCard() {
     return FractionallySizedBox(
-      widthFactor: 0.5,
-      heightFactor: 0.5,
+      widthFactor: 0.95,
+      heightFactor: 0.8,
       child: Card(
         child: Padding(
           padding: EdgeInsets.all(5),
@@ -91,10 +92,7 @@ class LoginPageState extends State<LoginPage>{
             children: [
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 15.0),
-                child: const Text(
-                  "You're Logged In",
-                  style: TextStyle(fontSize: 25.0)
-                )
+                child: const Dashboard()
               ),
               FractionallySizedBox(
                 widthFactor: 0.8,
