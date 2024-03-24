@@ -103,7 +103,7 @@ class _DashboardState extends State<Dashboard> {
       child: Row(
         children: [
           Expanded(
-            flex: 2,
+            flex: 1,
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.3)),
               child: chatHistory()
