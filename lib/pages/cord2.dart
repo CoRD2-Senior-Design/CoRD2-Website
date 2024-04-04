@@ -1,37 +1,21 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cord2_website/components/chat_screen.dart';
+import 'package:cord2_website/components/search.dart';
 import 'package:cord2_website/models/chat_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:flutter_map_geojson/flutter_map_geojson.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
 
-class MarkerData {
-  final String title;
-  final String creatorId;
-  final String creator;
-  final String description;
-  final double latitude;
-  final double longitude;
-  final String eventType;
-  final DateTime time;
-
-  MarkerData(
-      this.title,
-      this.creatorId,
-      this.creator,
-      this.description,
-      this.latitude,
-      this.longitude,
-      this.eventType,
-      this.time
-      );
-}
+import '../models/point_data.dart';
 
 class Cord2 extends StatefulWidget {
   const Cord2({super.key});
@@ -41,11 +25,16 @@ class Cord2 extends StatefulWidget {
 }
 
 class Cord2State extends State<Cord2>{
+  final double latitude = 28.5384;
+  final double longitude = -81.3789;
   CollectionReference events = FirebaseFirestore.instance.collection("events");
   CollectionReference users = FirebaseFirestore.instance.collection("users");
   late List<Marker> _markers = [];
+  late List<PointData> _data = [];
+  late MapController mapController;
   bool _info = true;
-  MarkerData? _selectedMarker;
+  PointData? _selectedMarker;
+  Map<String, dynamic>? _selectedGeoMarker;
   final int blurple = 0xff20297A;
   late ChatModel _selectedChat;
 
@@ -53,46 +42,76 @@ class Cord2State extends State<Cord2>{
   @override
   void initState() {
     super.initState();
+    mapController = MapController();
     createMarkers();
   }
 
+  void zoomTo(double lat, double lon) {
+    mapController.move(LatLng(lat, lon), 15.0);
+  }
+
+  void refreshMap() async {
+    createMarkers();
+  }
+
+  // shows user submitted reports
   void createMarkers() async {
     List<Marker> markers = [];
+    List<PointData> points = [];
     // Get docs from collection reference
     QuerySnapshot querySnapshot = await events.get();
     // Get data from docs and convert map to List
-    final allData = querySnapshot.docs.map((doc) => doc.data()as Map<String, dynamic>).toList();
+    final allData = querySnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
+
+    QuerySnapshot userSnapshot = await users.get();
+    // Get data from docs and convert map to List
+    final allUsers = userSnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
 
     // loop through allData and add markers there
     for (var point in allData) {
+      String theUser;
+      DocumentSnapshot doc = await users.doc(point['creator'].toString()).get();
+      if (!mounted) return;
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      String username = data['name'];
+      DateTime time = point['time'].toDate();
+      String imageURL = point['images'].toString();
+
       // if active show/add, otherwise dont show
       if (point['active'] == true) {
-        MarkerData markerData = MarkerData(
-            point['title'],
-            point['creator'],
-            "",
-            point['description'],
+        var pointData = PointData(
             point['latitude'] as double,
             point['longitude'] as double,
+            point['description'],
+            point['title'],
             point['eventType'],
-            point['time'].toDate()
-        );
+            imageURL.substring(1, imageURL.length -1),
+            DateFormat.yMEd().add_jms().format(time),
+            username,
+            point['creator']);
+
         markers.add(Marker(
-            point: LatLng(point['latitude'] as double, point['longitude'] as double),
+            point: LatLng(
+                point['latitude'] as double, point['longitude'] as double),
             width: 56,
             height: 56,
-            child: customMarker(markerData)
-        ));
+            child: customMarker(pointData)));
+        points.add(pointData);
       }
     }
 
     setState(() {
+      if (!mounted) return;
       _markers = markers;
+      _data = points;
     });
-
   }
 
-  MouseRegion customMarker(MarkerData data) {
+  MouseRegion customMarker(PointData data) {
     return MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
@@ -102,22 +121,13 @@ class Cord2State extends State<Cord2>{
     );
   }
 
-  void handleMarkerSelect(MarkerData data) async {
+  void handleMarkerSelect(PointData data) async {
     String theUser = data.creatorId;
     DocumentSnapshot doc = await users.doc(theUser).get();
     Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
     setState(() {
       _info = true;
-      _selectedMarker = MarkerData(
-          data.title,
-          data.creatorId,
-          userData['name'],
-          data.description,
-          data.latitude,
-          data.longitude,
-          data.eventType,
-          data.time
-      );
+      _selectedMarker = data;
     });
   }
 
@@ -305,7 +315,7 @@ class Cord2State extends State<Cord2>{
                   Container(
                     margin: const EdgeInsets.symmetric(vertical: 5.0),
                     child: Text(
-                      "Uploaded By: ${_selectedMarker.creator}\nDate: ${DateFormat.yMEd().add_jms().format(_selectedMarker.time)}",
+                      "Uploaded By: ${_selectedMarker.creator}\nDate: ${_selectedMarker.formattedDate}",
                       style: const TextStyle(
                         fontSize: 15.0,
                       ),
@@ -357,40 +367,70 @@ class Cord2State extends State<Cord2>{
   }
 
   Widget renderMap(double screenWidth) {
-    return Stack(
-      children: [
-        FlutterMap(
-            options: const MapOptions(
-              initialCenter: LatLng(28.6026, -81.2001),
-              initialZoom: 6
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'dev.cord2.map',
-                tileProvider: CancellableNetworkTileProvider(),
+    return Scaffold(
+      body: Search(
+          map: FlutterMap(
+            mapController: mapController,
+              options: const MapOptions(
+                initialCenter: LatLng(28.6026, -81.2001),
+                initialZoom: 6
               ),
-              MarkerLayer(markers: _markers)
-            ]
-        ),
-        Container(
-          color: const Color.fromRGBO(0, 0, 0, 0.75),
-          width: screenWidth,
-          height: 30,
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text("CoRD2 Map", style: TextStyle(color: Colors.white))
-              )
-            ]
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'dev.cord2.map',
+                  tileProvider: CancellableNetworkTileProvider(),
+                ),
+                _buildClusterLayer(_markers, Colors.blue),
+              ]
           ),
+          data: _data,
+          onSelect: handleMarkerSelect,
+          mapContext: context,
+          zoomTo: zoomTo
         ),
-      ]
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget> [
+          FloatingActionButton(
+            onPressed: () {
+              refreshMap();
+            },
+            backgroundColor:  Color(0xff060C3E),
+            child: Icon(Icons.refresh, color: Colors.white),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+        ],
+      ),
     );
+  }
 
+  MarkerClusterLayerWidget _buildClusterLayer(
+      List<Marker> markers, Color color) {
+    return MarkerClusterLayerWidget(
+        options: MarkerClusterLayerOptions(
+            maxClusterRadius: 75,
+            size: const Size(40, 40),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(50),
+            markers: markers,
+            builder: (context, markers) {
+              return Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: color,
+              ),
+              child: Text(markers.length.toString(),
+              style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              decoration: TextDecoration.none,
+              )));
+          }));
   }
 
 
