@@ -11,7 +11,8 @@ class Search extends StatelessWidget {
         required this.data,
         required this.onSelect,
         required this.mapContext,
-        required this.zoomTo})
+        required this.zoomTo,
+      })
       : super(key: key);
   final Widget map;
   final List<PointData> data;
@@ -50,6 +51,7 @@ class Search extends StatelessWidget {
                       title: Text(point.title),
                       onTap: () {
                         zoomTo(point.latitude, point.longitude);
+                        onSelect(point);
                         controller.closeView(point.title);
                       }
                   )).toList();
@@ -61,6 +63,7 @@ class Search extends StatelessWidget {
                       title: Text(point.title),
                       onTap: () {
                         zoomTo(point.latitude, point.longitude);
+                        onSelect(point);
                         controller.closeView(point.title);
                       }
                   )).toList();

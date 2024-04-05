@@ -11,6 +11,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:flutter_map_geojson/flutter_map_geojson.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
@@ -221,14 +222,14 @@ class Cord2State extends State<Cord2>{
             Expanded(
               flex: 2,
               child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.75)),
+              constraints: BoxConstraints(maxHeight: 750, minHeight: 750),
               child: renderMap(screenWidth),
               ),
             ),
             Expanded(
               flex: 2,
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.25)),
+                constraints: BoxConstraints(maxHeight: 750, minHeight: 750),
                 child: _info ? renderSelection() : MessagePage(chat: _selectedChat, closeChat: () => setState(() {_info = true;})),
               ),
             )
@@ -299,63 +300,132 @@ class Cord2State extends State<Cord2>{
           color: const Color.fromRGBO(83, 83, 83, 0.5),
           child: Padding(
             padding: const EdgeInsets.all(5),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 5.0),
-                    child: Text(
-                      "Report Title: ${_selectedMarker.title}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 25.0,
-                      ),
-                    )
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 5.0),
-                    child: Text(
-                      "Uploaded By: ${_selectedMarker.creator}\nDate: ${_selectedMarker.formattedDate}",
-                      style: const TextStyle(
-                        fontSize: 15.0,
-                      ),
-                    )
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 5.0),
-                    child: Text(
-                      "Report Description: ${_selectedMarker.description}",
-                      style: const TextStyle(
-                        fontSize: 15.0
+            child:  Padding(
+                      padding: const EdgeInsets.only(top:20, bottom:20),
+                      child:
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                        ),
+                        child: SingleChildScrollView(child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top:25, bottom:5),
+                              child: Center(
+                                  child: Text(
+                                      style: GoogleFonts.jost(
+                                          textStyle: const
+                                          TextStyle(
+                                            fontSize: 30,
+                                            fontWeight: FontWeight.normal,
+                                            color: Color(0xff060C3E),
+                                            decoration: TextDecoration.underline,
+                                            decorationColor: Color(0xff242C73), // Color of the underline
+                                            decorationThickness: 2.0,     // Thickness of the underline
+                                            decorationStyle: TextDecorationStyle.solid,
+                                          )),
+                                      _selectedMarker.title)),
+                            ),
+                            const SizedBox(height:5),
+                            Text(
+                                style: GoogleFonts.jost(
+                                    textStyle: const
+                                    TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.normal,
+                                      color: Color(0xff060C3E),
+                                    )),
+                                _selectedMarker.eventType),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Center(
+                                  child: Text(
+                                      style: GoogleFonts.jost(
+                                          textStyle: const
+                                          TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.normal,
+                                            color: Color(0xff060C3E),
+                                          )),
+                                      'Submitted by: ${_selectedMarker.creator}')),
+                            ),
+                            SizedBox(height:5),
+                            Center(
+                              child:  Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Container(
+                                      color: Colors.deepOrange,
+                                      child: Text(
+                                          style: GoogleFonts.jost(
+                                              textStyle: const
+                                              TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.normal,
+                                                color: Colors.white,
+                                              )),
+                                          _selectedMarker.description))),
+                            ),
+                            SizedBox(height:10),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Center(
+                                  child: Image.network(
+                                    _selectedMarker.imageURL,
+                                    width: 250,
+                                    height: 250,
+                                  )
+                              ),
+                            ),
+                            SizedBox(height:10),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Center(child: Text(_selectedMarker.formattedDate, style: GoogleFonts.jost(
+                                  textStyle: const
+                                  TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.normal,
+                                    color: Color(0xff060C3E),
+                                  )),)),
+                            ),
+                            SizedBox(height:10),
+                            if (FirebaseAuth.instance.currentUser != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child:
+                                ElevatedButton(
+                                    style: ButtonStyle(
+                                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                        EdgeInsets.all(10.0), // Adjust the padding to change the size
+                                      ),
+                                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xff242C73)), // Default color
+                                      overlayColor: MaterialStateProperty.resolveWith<Color>(
+                                            (Set<MaterialState> states) {
+                                          if (states.contains(MaterialState.hovered))
+                                            return Colors.blueAccent.withOpacity(0.5); // Hover color
+                                          return Colors.red; // No overlay color
+                                        },
+                                      ),
+                                    ),
+                                    onPressed: () { handleUserChat(); },
+                                    child: Text(
+                                      "Chat with this user",
+                                      style: GoogleFonts.jost(
+                                          textStyle: const
+                                          TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.normal,
+                                            color: Colors.white,
+                                          )),
+                                    )
+                                ),
+                              ),
+                          ],
+                        ),
                       )
-                    ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(
-                        child: Image.network(
-                          _selectedMarker.imageURL,
-                          width: 250,
-                          height: 250,
-                        )),
-                  ),
-                  if (FirebaseAuth.instance.currentUser != null) GestureDetector(
-                    onTap: () => handleUserChat(),
-                    child: const Text.rich(
-                      TextSpan(
-                        text: "Chat with this user",
-                        mouseCursor: MaterialStateMouseCursor.clickable,
-                        style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          fontSize: 15.0
-                        )
-                      )
-                    )
-                  ),
-                ]
-            )
+            ),
           )
-      );
+          );
     } else {
       return Container(
         color: const Color.fromRGBO(83, 83, 83, 0.5),
