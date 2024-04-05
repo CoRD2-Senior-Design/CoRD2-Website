@@ -330,6 +330,15 @@ class Cord2State extends State<Cord2>{
                       )
                     ),
                   ),
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(
+                        child: Image.network(
+                          _selectedMarker.imageURL,
+                          width: 250,
+                          height: 250,
+                        )),
+                  ),
                   if (FirebaseAuth.instance.currentUser != null) GestureDetector(
                     onTap: () => handleUserChat(),
                     child: const Text.rich(
