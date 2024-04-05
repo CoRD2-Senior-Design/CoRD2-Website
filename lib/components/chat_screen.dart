@@ -30,6 +30,7 @@ class _MessagePageState extends State<MessagePage> {
   final CollectionReference users = FirebaseFirestore.instance.collection('users');
   late StreamSubscription<DatabaseEvent> _msgSubscription;
   late List<MessageModel> _messages = [];
+  late ChatModel lastChat;
   TextEditingController textController = TextEditingController();
 
   @override
@@ -39,6 +40,7 @@ class _MessagePageState extends State<MessagePage> {
       Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
     }
     getMessages();
+    lastChat = widget.chat;
   }
 
   void getMessages() {
@@ -46,6 +48,7 @@ class _MessagePageState extends State<MessagePage> {
       _messages = [];
     });
     ChatModel? chat = widget.chat;
+    print(chat);
     DatabaseReference msgRef = FirebaseDatabase.instance.ref('msgs/${chat?.id}').orderByKey().ref;
     _msgSubscription = msgRef.onValue.listen((DatabaseEvent event) async {
       List<MessageModel> newList = [];
@@ -173,6 +176,10 @@ class _MessagePageState extends State<MessagePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (lastChat != widget.chat) {
+      getMessages();
+      lastChat = widget.chat;
+    }
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(

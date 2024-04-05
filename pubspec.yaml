@@ -38,11 +38,14 @@ dependencies:
   flutter_map: 6.0.1
   latlong2: 0.9.0
   flutter_map_cancellable_tile_provider: ^1.0.0
+  flutter_map_geojson: ^1.0.6
+  flutter_map_marker_cluster: any
   firebase_auth: ^4.14.1
   firebase_core: ^2.23.0
   cloud_firestore: ^4.13.3
   firebase_database: ^10.4.0
   chat_bubbles: ^1.5.0
+  google_fonts: ^5.1.0
   uuid: ^4.2.2
   intl: ^0.18.1
 

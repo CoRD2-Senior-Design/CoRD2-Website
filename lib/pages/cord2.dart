@@ -1,37 +1,22 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cord2_website/components/chat_screen.dart';
+import 'package:cord2_website/components/search.dart';
 import 'package:cord2_website/models/chat_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:flutter_map_geojson/flutter_map_geojson.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
 
-class MarkerData {
-  final String title;
-  final String creatorId;
-  final String creator;
-  final String description;
-  final double latitude;
-  final double longitude;
-  final String eventType;
-  final DateTime time;
-
-  MarkerData(
-      this.title,
-      this.creatorId,
-      this.creator,
-      this.description,
-      this.latitude,
-      this.longitude,
-      this.eventType,
-      this.time
-      );
-}
+import '../models/point_data.dart';
 
 class Cord2 extends StatefulWidget {
   const Cord2({super.key});
@@ -41,11 +26,16 @@ class Cord2 extends StatefulWidget {
 }
 
 class Cord2State extends State<Cord2>{
+  final double latitude = 28.5384;
+  final double longitude = -81.3789;
   CollectionReference events = FirebaseFirestore.instance.collection("events");
   CollectionReference users = FirebaseFirestore.instance.collection("users");
   late List<Marker> _markers = [];
+  late List<PointData> _data = [];
+  late MapController mapController;
   bool _info = true;
-  MarkerData? _selectedMarker;
+  PointData? _selectedMarker;
+  Map<String, dynamic>? _selectedGeoMarker;
   final int blurple = 0xff20297A;
   late ChatModel _selectedChat;
 
@@ -53,46 +43,76 @@ class Cord2State extends State<Cord2>{
   @override
   void initState() {
     super.initState();
+    mapController = MapController();
     createMarkers();
   }
 
+  void zoomTo(double lat, double lon) {
+    mapController.move(LatLng(lat, lon), 15.0);
+  }
+
+  void refreshMap() async {
+    createMarkers();
+  }
+
+  // shows user submitted reports
   void createMarkers() async {
     List<Marker> markers = [];
+    List<PointData> points = [];
     // Get docs from collection reference
     QuerySnapshot querySnapshot = await events.get();
     // Get data from docs and convert map to List
-    final allData = querySnapshot.docs.map((doc) => doc.data()as Map<String, dynamic>).toList();
+    final allData = querySnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
+
+    QuerySnapshot userSnapshot = await users.get();
+    // Get data from docs and convert map to List
+    final allUsers = userSnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
 
     // loop through allData and add markers there
     for (var point in allData) {
+      String theUser;
+      DocumentSnapshot doc = await users.doc(point['creator'].toString()).get();
+      if (!mounted) return;
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      String username = data['name'];
+      DateTime time = point['time'].toDate();
+      String imageURL = point['images'].toString();
+
       // if active show/add, otherwise dont show
       if (point['active'] == true) {
-        MarkerData markerData = MarkerData(
-            point['title'],
-            point['creator'],
-            "",
-            point['description'],
+        var pointData = PointData(
             point['latitude'] as double,
             point['longitude'] as double,
+            point['description'],
+            point['title'],
             point['eventType'],
-            point['time'].toDate()
-        );
+            imageURL.substring(1, imageURL.length -1),
+            DateFormat.yMEd().add_jms().format(time),
+            username,
+            point['creator']);
+
         markers.add(Marker(
-            point: LatLng(point['latitude'] as double, point['longitude'] as double),
+            point: LatLng(
+                point['latitude'] as double, point['longitude'] as double),
             width: 56,
             height: 56,
-            child: customMarker(markerData)
-        ));
+            child: customMarker(pointData)));
+        points.add(pointData);
       }
     }
 
     setState(() {
+      if (!mounted) return;
       _markers = markers;
+      _data = points;
     });
-
   }
 
-  MouseRegion customMarker(MarkerData data) {
+  MouseRegion customMarker(PointData data) {
     return MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
@@ -102,22 +122,13 @@ class Cord2State extends State<Cord2>{
     );
   }
 
-  void handleMarkerSelect(MarkerData data) async {
+  void handleMarkerSelect(PointData data) async {
     String theUser = data.creatorId;
     DocumentSnapshot doc = await users.doc(theUser).get();
     Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
     setState(() {
       _info = true;
-      _selectedMarker = MarkerData(
-          data.title,
-          data.creatorId,
-          userData['name'],
-          data.description,
-          data.latitude,
-          data.longitude,
-          data.eventType,
-          data.time
-      );
+      _selectedMarker = data;
     });
   }
 
@@ -211,14 +222,14 @@ class Cord2State extends State<Cord2>{
             Expanded(
               flex: 2,
               child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.75)),
+              constraints: BoxConstraints(maxHeight: 750, minHeight: 750),
               child: renderMap(screenWidth),
               ),
             ),
             Expanded(
               flex: 2,
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 600, maxWidth: (screenWidth * 0.25)),
+                constraints: BoxConstraints(maxHeight: 750, minHeight: 750),
                 child: _info ? renderSelection() : MessagePage(chat: _selectedChat, closeChat: () => setState(() {_info = true;})),
               ),
             )
@@ -289,54 +300,132 @@ class Cord2State extends State<Cord2>{
           color: const Color.fromRGBO(83, 83, 83, 0.5),
           child: Padding(
             padding: const EdgeInsets.all(5),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 5.0),
-                    child: Text(
-                      "Report Title: ${_selectedMarker.title}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 25.0,
-                      ),
-                    )
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 5.0),
-                    child: Text(
-                      "Uploaded By: ${_selectedMarker.creator}\nDate: ${DateFormat.yMEd().add_jms().format(_selectedMarker.time)}",
-                      style: const TextStyle(
-                        fontSize: 15.0,
-                      ),
-                    )
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 5.0),
-                    child: Text(
-                      "Report Description: ${_selectedMarker.description}",
-                      style: const TextStyle(
-                        fontSize: 15.0
+            child:  Padding(
+                      padding: const EdgeInsets.only(top:20, bottom:20),
+                      child:
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                        ),
+                        child: SingleChildScrollView(child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top:25, bottom:5),
+                              child: Center(
+                                  child: Text(
+                                      style: GoogleFonts.jost(
+                                          textStyle: const
+                                          TextStyle(
+                                            fontSize: 30,
+                                            fontWeight: FontWeight.normal,
+                                            color: Color(0xff060C3E),
+                                            decoration: TextDecoration.underline,
+                                            decorationColor: Color(0xff242C73), // Color of the underline
+                                            decorationThickness: 2.0,     // Thickness of the underline
+                                            decorationStyle: TextDecorationStyle.solid,
+                                          )),
+                                      _selectedMarker.title)),
+                            ),
+                            const SizedBox(height:5),
+                            Text(
+                                style: GoogleFonts.jost(
+                                    textStyle: const
+                                    TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.normal,
+                                      color: Color(0xff060C3E),
+                                    )),
+                                _selectedMarker.eventType),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Center(
+                                  child: Text(
+                                      style: GoogleFonts.jost(
+                                          textStyle: const
+                                          TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.normal,
+                                            color: Color(0xff060C3E),
+                                          )),
+                                      'Submitted by: ${_selectedMarker.creator}')),
+                            ),
+                            SizedBox(height:5),
+                            Center(
+                              child:  Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Container(
+                                      color: Colors.deepOrange,
+                                      child: Text(
+                                          style: GoogleFonts.jost(
+                                              textStyle: const
+                                              TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.normal,
+                                                color: Colors.white,
+                                              )),
+                                          _selectedMarker.description))),
+                            ),
+                            SizedBox(height:10),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Center(
+                                  child: Image.network(
+                                    _selectedMarker.imageURL,
+                                    width: 250,
+                                    height: 250,
+                                  )
+                              ),
+                            ),
+                            SizedBox(height:10),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Center(child: Text(_selectedMarker.formattedDate, style: GoogleFonts.jost(
+                                  textStyle: const
+                                  TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.normal,
+                                    color: Color(0xff060C3E),
+                                  )),)),
+                            ),
+                            SizedBox(height:10),
+                            if (FirebaseAuth.instance.currentUser != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child:
+                                ElevatedButton(
+                                    style: ButtonStyle(
+                                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                        EdgeInsets.all(10.0), // Adjust the padding to change the size
+                                      ),
+                                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xff242C73)), // Default color
+                                      overlayColor: MaterialStateProperty.resolveWith<Color>(
+                                            (Set<MaterialState> states) {
+                                          if (states.contains(MaterialState.hovered))
+                                            return Colors.blueAccent.withOpacity(0.5); // Hover color
+                                          return Colors.red; // No overlay color
+                                        },
+                                      ),
+                                    ),
+                                    onPressed: () { handleUserChat(); },
+                                    child: Text(
+                                      "Chat with this user",
+                                      style: GoogleFonts.jost(
+                                          textStyle: const
+                                          TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.normal,
+                                            color: Colors.white,
+                                          )),
+                                    )
+                                ),
+                              ),
+                          ],
+                        ),
                       )
-                    ),
                   ),
-                  if (FirebaseAuth.instance.currentUser != null) GestureDetector(
-                    onTap: () => handleUserChat(),
-                    child: const Text.rich(
-                      TextSpan(
-                        text: "Chat with this user",
-                        mouseCursor: MaterialStateMouseCursor.clickable,
-                        style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          fontSize: 15.0
-                        )
-                      )
-                    )
-                  ),
-                ]
-            )
+            ),
           )
-      );
+          );
     } else {
       return Container(
         color: const Color.fromRGBO(83, 83, 83, 0.5),
@@ -357,40 +446,70 @@ class Cord2State extends State<Cord2>{
   }
 
   Widget renderMap(double screenWidth) {
-    return Stack(
-      children: [
-        FlutterMap(
-            options: const MapOptions(
-              initialCenter: LatLng(28.6026, -81.2001),
-              initialZoom: 6
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'dev.cord2.map',
-                tileProvider: CancellableNetworkTileProvider(),
+    return Scaffold(
+      body: Search(
+          map: FlutterMap(
+            mapController: mapController,
+              options: const MapOptions(
+                initialCenter: LatLng(28.6026, -81.2001),
+                initialZoom: 6
               ),
-              MarkerLayer(markers: _markers)
-            ]
-        ),
-        Container(
-          color: const Color.fromRGBO(0, 0, 0, 0.75),
-          width: screenWidth,
-          height: 30,
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text("CoRD2 Map", style: TextStyle(color: Colors.white))
-              )
-            ]
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'dev.cord2.map',
+                  tileProvider: CancellableNetworkTileProvider(),
+                ),
+                _buildClusterLayer(_markers, Colors.blue),
+              ]
           ),
+          data: _data,
+          onSelect: handleMarkerSelect,
+          mapContext: context,
+          zoomTo: zoomTo
         ),
-      ]
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget> [
+          FloatingActionButton(
+            onPressed: () {
+              refreshMap();
+            },
+            backgroundColor:  Color(0xff060C3E),
+            child: Icon(Icons.refresh, color: Colors.white),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+        ],
+      ),
     );
+  }
 
+  MarkerClusterLayerWidget _buildClusterLayer(
+      List<Marker> markers, Color color) {
+    return MarkerClusterLayerWidget(
+        options: MarkerClusterLayerOptions(
+            maxClusterRadius: 75,
+            size: const Size(40, 40),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(50),
+            markers: markers,
+            builder: (context, markers) {
+              return Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: color,
+              ),
+              child: Text(markers.length.toString(),
+              style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              decoration: TextDecoration.none,
+              )));
+          }));
   }
 
 
