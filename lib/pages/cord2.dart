@@ -324,6 +324,7 @@ class Cord2State extends State<Cord2>{
                                             decorationThickness: 2.0,     // Thickness of the underline
                                             decorationStyle: TextDecorationStyle.solid,
                                           )),
+                                      textAlign: TextAlign.center,
                                       _selectedMarker.title)),
                             ),
                             const SizedBox(height:5),
@@ -429,14 +430,15 @@ class Cord2State extends State<Cord2>{
     } else {
       return Container(
         color: const Color.fromRGBO(83, 83, 83, 0.5),
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.all(5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 "Select a Marker to View Information",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: GoogleFonts.jost(textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                textAlign: TextAlign.center,
               ),
             ]
           )
